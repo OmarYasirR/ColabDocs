@@ -1,0 +1,95 @@
+# ===========================
+# Dependencies
+# ===========================
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/install-state.gz
+
+# ===========================
+# Environment variables
+# ===========================
+.env
+.env.*
+!.env.example
+*.local
+
+# ===========================
+# Build output
+# ===========================
+dist/
+dist-ssr/
+build/
+out/
+.vite/
+.cache/
+.parcel-cache/
+
+# ===========================
+# Logs
+# ===========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+server/logs/
+
+# ===========================
+# Testing and coverage
+# ===========================
+coverage/
+.nyc_output/
+
+# ===========================
+# Runtime and temp files
+# ===========================
+pids/
+*.pid
+*.seed
+*.pid.lock
+tmp/
+temp/
+*.tmp
+
+# ===========================
+# Uploads and local data
+# ===========================
+uploads/
+server/uploads/
+dump.rdb
+*.rdb
+data/db/
+
+# ===========================
+# Editor and IDE
+# ===========================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===========================
+# OS files
+# ===========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===========================
+# Misc
+# ===========================
+*.tsbuildinfo
+.eslintcache
+structure.txt
+client/structure.txt

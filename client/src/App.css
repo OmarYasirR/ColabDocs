@@ -1,0 +1,11 @@
+/* src/App.css */
+/*
+  Intentionally minimal — Tailwind utility classes (see index.css) cover
+  the vast majority of styling. This file is reserved for any one-off,
+  non-utility CSS (e.g. third-party widget overrides) that doesn't fit
+  cleanly into @layer components.
+*/
+
+.App {
+  height: 100%;
+}

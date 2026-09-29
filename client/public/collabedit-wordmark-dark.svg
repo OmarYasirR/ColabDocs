@@ -1,0 +1,9 @@
+<svg viewBox="0 0 340 80" xmlns="http://www.w3.org/2000/svg" font-family="Inter, -apple-system, 'Segoe UI', sans-serif">
+  <rect x="4" y="4" width="72" height="72" rx="18" fill="#6366f1"/>
+  <path d="M26 22 L26 56 L34.5 48.5 L40.5 60.5 L46.5 57.5 L40.5 45.5 L50.5 45.5 Z"
+        fill="white" transform="scale(0.9) translate(4,4)"/>
+  <path d="M37 32 L37 64 L45.5 57 L52 70.5 L58 67.5 L52 55 L62 55 Z"
+        fill="#c7d2fe" transform="scale(0.9) translate(4,4)"/>
+  <text x="96" y="49" font-size="30" font-weight="700" letter-spacing="-0.5"
+        fill="white">Collab<tspan fill="#a5b4fc">Edit</tspan></text>
+</svg>
