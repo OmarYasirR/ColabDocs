@@ -1,4 +1,4 @@
-![screenshot](client/public/collabedit-icon.svg)
+![project screenshot](client/public/collabedit-icon.svg)
 
 
 <div align="center">
