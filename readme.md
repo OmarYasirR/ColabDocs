@@ -1,6 +1,7 @@
-<div align="center">
+![screenshot](client/public/collabedit-icon.svg)
 
-<img src="client/public/collabedit-icon.svg" alt="CollabEdit" width="320" />
+
+<div align="center">
 
  # CollabDocs
 
