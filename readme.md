@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="client/public/collabedit-wordmark-light.svg" alt="CollabEdit" width="320" />
+<img src="client/public/collabedit-icon.svg" alt="CollabEdit" width="320" />
 
-# CollabDocs
+ # CollabDocs
 
 **A real-time collaborative document editor built with the MERN stack.**
 
