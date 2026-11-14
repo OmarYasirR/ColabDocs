@@ -1,20 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectHasUnreadNotifications, notificationsCleared } from '../../redux/slices/uiSlice';
-import { HiOutlineBars3, HiOutlineBell, HiOutlineChevronDown } from 'react-icons/hi2';
+import { HiOutlineBars3, HiOutlineChevronDown } from 'react-icons/hi2';
 import { FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
 
 import { toggleSidebar } from '../../redux/slices/uiSlice';
 import { selectCurrentUser } from '../../redux/slices/authSlice';
 import useAuth from '../../hooks/useAuth';
 import { APP_NAME } from '../../utils/constants';
-import NotificationDropdown from './NotificationDropdown'
+import NotificationDropdown from './NotificationDropdown';
+import { cx } from '../../utils/helpers';
 
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const hasUnread = useSelector(selectHasUnreadNotifications);
   const user = useSelector(selectCurrentUser);
   const { logout } = useAuth();
 
@@ -42,17 +41,17 @@ const Header = () => {
 
   const handleLogout = async () => {
     setMenuOpen(false);
-    navigate('/login');
     await logout();
+    navigate('/login');
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm">
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200 bg-white/90 px-2.5 backdrop-blur sm:px-4">
+      <div className="flex items-center gap-1.5 sm:gap-3">
         <button
           type="button"
           onClick={() => dispatch(toggleSidebar())}
-          className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
           aria-label="Toggle sidebar"
         >
           <HiOutlineBars3 className="h-5 w-5" />
@@ -61,33 +60,46 @@ const Header = () => {
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-lg px-1 py-1 transition-colors hover:bg-slate-50"
         >
-          <img src="/collabedit-icon.svg" alt="" className="h-7 w-7 rounded-md" />
-          <span className="text-base font-semibold text-slate-900">{APP_NAME}</span>
+          <img src="/collabedit-wordmark-light.svg" className="h-9 w-auto" alt="applogo" />
         </button>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <NotificationDropdown />
 
         <div className="relative" ref={menuRef}>
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-slate-100"
+            className={cx(
+              'flex items-center gap-2 rounded-lg px-1.5 py-1 transition-colors',
+              'hover:bg-slate-100',
+              menuOpen && 'bg-slate-100'
+            )}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 text-xs font-semibold text-indigo-700 ring-2 ring-white">
               {initials}
             </div>
-            <span className="hidden text-sm font-medium text-slate-700 sm:block">
+            <span className="hidden max-w-[10rem] truncate text-sm font-medium text-slate-700 sm:inline">
               {user?.name || 'Account'}
             </span>
-            <HiOutlineChevronDown className="h-4 w-4 text-slate-400" />
+            <HiOutlineChevronDown
+              className={cx(
+                'hidden h-4 w-4 text-slate-400 transition-transform sm:inline',
+                menuOpen && 'rotate-180'
+              )}
+            />
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 z-20 mt-2 w-48 animate-slide-up rounded-lg border border-slate-200 bg-white py-1 shadow-popover">
+            <div
+              role="menu"
+              className="absolute right-0 z-20 mt-2 w-52 animate-slide-up rounded-xl border border-slate-200 bg-white py-1 shadow-popover"
+            >
               <button
                 type="button"
                 onClick={() => {
