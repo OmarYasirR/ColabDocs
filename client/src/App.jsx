@@ -19,11 +19,11 @@ import { registerUnauthorizedHandler } from "./services/api";
 import { logoutUser, selectAuthStatus } from "./redux/slices/authSlice";
 
 import "./App.css";
-import Spinner from "./components/common/Spinner";
+import AppSkeleton from "./components/layout/AppSkeleton";
 
 function App() {
   const dispatch = useDispatch();
-  const { bootstrapSession, isAuthenticated } = useAuth();
+  const { bootstrapSession, isAuthenticated, isInitialized } = useAuth();
   const status = useSelector(selectAuthStatus);
 
   // Establish/tear down the real-time connection based on auth state.
@@ -48,10 +48,8 @@ function App() {
   return (
     <div className="App h-full">
       {/* show spinner while initializing auth state */}
-      {status === "loading" ? (
-        <div className="flex justify-center items-center h-full">
-          <Spinner size="lg" />
-        </div>
+      {!isInitialized && status === 'loading' ? (
+        <AppSkeleton />
       ) : (
         <Routes>
           {/* Public routes */}

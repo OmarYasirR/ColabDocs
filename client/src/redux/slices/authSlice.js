@@ -68,6 +68,9 @@ const authSlice = createSlice({
       state.user = user;
       state.token = token;
     },
+    updateCurrentUser(state, action) {
+      state.user = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -125,7 +128,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthError, setCredentials } = authSlice.actions;
+export const { clearAuthError, setCredentials, updateCurrentUser } = authSlice.actions;
 
 // ---------------------------------------------------------------------------
 // Selectors

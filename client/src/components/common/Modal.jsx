@@ -1,14 +1,13 @@
-// src/components/common/Modal.jsx
 import { useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { HiOutlineXMark } from 'react-icons/hi2';
 import { cx } from '../../utils/helpers';
 
 const SIZE_CLASSES = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-2xl',
+  sm: 'sm:max-w-sm',
+  md: 'sm:max-w-md',
+  lg: 'sm:max-w-lg',
+  xl: 'sm:max-w-2xl',
 };
 
 const Modal = ({
@@ -40,9 +39,9 @@ const Modal = ({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div
-        className="absolute inset-0 animate-fade-in bg-slate-900/40 backdrop-blur-sm"
+        className="absolute inset-0 animate-fade-in bg-slate-900/50 backdrop-blur-sm"
         onClick={closeOnOverlayClick ? onClose : undefined}
       />
 
@@ -50,17 +49,18 @@ const Modal = ({
         role="dialog"
         aria-modal="true"
         className={cx(
-          'relative z-10 w-full animate-slide-up rounded-xl bg-white shadow-popover',
+          'relative z-10 flex max-h-[92vh] w-full animate-slide-up flex-col bg-white shadow-popover',
+          'rounded-t-2xl sm:rounded-xl',
           SIZE_CLASSES[size]
         )}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3.5 sm:px-5">
             <h2 className="text-base font-semibold text-slate-900">{title}</h2>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
               aria-label="Close"
             >
               <HiOutlineXMark className="h-5 w-5" />
@@ -68,10 +68,12 @@ const Modal = ({
           </div>
         )}
 
-        <div className="px-5 py-4">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+          {children}
+        </div>
 
         {footer && (
-          <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
+          <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-4 py-3 sm:px-5">
             {footer}
           </div>
         )}

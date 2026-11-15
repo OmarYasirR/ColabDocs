@@ -1,4 +1,3 @@
-// src/components/editor/ShareModal.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { HiOutlineUserPlus, HiOutlineXMark } from 'react-icons/hi2';
@@ -17,11 +16,6 @@ import { getInitials } from '../../utils/helpers';
 
 const ROLE_LABELS = { user: 'Viewer', editor: 'Editor', owner: 'Owner' };
 
-/**
- * Share dialog: lists current collaborators (with remove, owner-only)
- * and a searchable list of other users in the system to invite. Role
- * management is intentionally simple — Viewer ('user') or Editor.
- */
 const ShareModal = ({ isOpen, onClose, documentId, ownerId }) => {
   const currentUser = useSelector(selectCurrentUser);
   const isOwner = currentUser?.id === ownerId;
@@ -51,7 +45,10 @@ const ShareModal = ({ isOpen, onClose, documentId, ownerId }) => {
     if (!documentId) return;
     setLoadingUsers(true);
     try {
-      const data = await collaborationService.getShareableUsers(documentId, debouncedSearch);
+      const data = await collaborationService.getShareableUsers(
+        documentId,
+        debouncedSearch
+      );
       setAvailableUsers(data.users || []);
     } finally {
       setLoadingUsers(false);
@@ -75,7 +72,9 @@ const ShareModal = ({ isOpen, onClose, documentId, ownerId }) => {
         userId,
         role: roleByUser[userId] || 'user',
       });
-      setAvailableUsers((prev) => prev.filter((u) => u._id !== userId && u.id !== userId));
+      setAvailableUsers((prev) =>
+        prev.filter((u) => u._id !== userId && u.id !== userId)
+      );
       loadCollaborators();
     } finally {
       setPendingUserId(null);
@@ -110,19 +109,23 @@ const ShareModal = ({ isOpen, onClose, documentId, ownerId }) => {
               {collaborators.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-slate-50"
+                  className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-slate-50"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700">
                       {getInitials(c.name)}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-800">{c.name}</p>
-                      <p className="text-xs text-slate-400">{c.email}</p>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-800">
+                        {c.name}
+                      </p>
+                      <p className="truncate text-xs text-slate-400">
+                        {c.email}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <span className="text-xs font-medium text-slate-500">
                       {ROLE_LABELS[c.role] || c.role}
                     </span>
@@ -158,7 +161,7 @@ const ShareModal = ({ isOpen, onClose, documentId, ownerId }) => {
               onChange={(e) => setSearch(e.target.value)}
             />
 
-            <div className="mt-3 max-h-60 space-y-1 overflow-y-auto">
+            <div className="mt-3 max-h-72 space-y-1 overflow-y-auto">
               {loadingUsers && (
                 <div className="flex justify-center py-4">
                   <Spinner size="sm" />
@@ -166,7 +169,7 @@ const ShareModal = ({ isOpen, onClose, documentId, ownerId }) => {
               )}
 
               {!loadingUsers && availableUsers.length === 0 && (
-                <p className="py-4 text-center text-sm text-slate-400">
+                <p className="py-6 text-center text-sm text-slate-400">
                   No matching users found.
                 </p>
               )}
@@ -177,23 +180,30 @@ const ShareModal = ({ isOpen, onClose, documentId, ownerId }) => {
                   return (
                     <div
                       key={userId}
-                      className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-slate-50"
+                      className="flex flex-col gap-2 rounded-lg px-2 py-2 hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
                           {getInitials(u.name)}
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">{u.name}</p>
-                          <p className="text-xs text-slate-400">{u.email}</p>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-slate-800">
+                            {u.name}
+                          </p>
+                          <p className="truncate text-xs text-slate-400">
+                            {u.email}
+                          </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-2 pl-10 sm:pl-0">
                         <select
                           value={roleByUser[userId] || 'user'}
                           onChange={(e) =>
-                            setRoleByUser((prev) => ({ ...prev, [userId]: e.target.value }))
+                            setRoleByUser((prev) => ({
+                              ...prev,
+                              [userId]: e.target.value,
+                            }))
                           }
                           className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 focus:border-indigo-500 focus:outline-none"
                         >

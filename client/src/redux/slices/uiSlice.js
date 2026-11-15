@@ -1,11 +1,14 @@
 import { createSlice, nanoid } from '@reduxjs/toolkit';
 import { TOAST_DURATION_MS } from '../../utils/constants';
 
+const isDesktop =
+  typeof window !== 'undefined' && window.innerWidth >= 1024;
+
 const initialState = {
-  sidebarOpen: true,
-  activeModal: null, // { type: MODAL_TYPES, props: {} } | null
-  toasts: [], // { id, type, message, duration }
-  theme: 'light', // reserved for future dark-mode support
+  sidebarOpen: isDesktop,
+  activeModal: null,
+  toasts: [],
+  theme: 'light',
   globalLoading: false,
   hasUnreadNotifications: false,
 };
@@ -32,9 +35,7 @@ const uiSlice = createSlice({
         state.toasts.push(action.payload);
       },
       prepare({ type = 'info', message, duration = TOAST_DURATION_MS }) {
-        return {
-          payload: { id: nanoid(), type, message, duration },
-        };
+        return { payload: { id: nanoid(), type, message, duration } };
       },
     },
     removeToast(state, action) {
@@ -64,13 +65,11 @@ export const {
   notificationsCleared,
 } = uiSlice.actions;
 
-// ---------------------------------------------------------------------------
-// Selectors
-// ---------------------------------------------------------------------------
 export const selectSidebarOpen = (state) => state.ui.sidebarOpen;
 export const selectActiveModal = (state) => state.ui.activeModal;
 export const selectToasts = (state) => state.ui.toasts;
 export const selectGlobalLoading = (state) => state.ui.globalLoading;
-export const selectHasUnreadNotifications = (state) => state.ui.hasUnreadNotifications;
+export const selectHasUnreadNotifications = (state) =>
+  state.ui.hasUnreadNotifications;
 
 export default uiSlice.reducer;
