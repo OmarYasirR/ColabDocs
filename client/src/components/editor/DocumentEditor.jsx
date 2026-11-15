@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useEditor, EditorContent, EditorProvider  } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -10,32 +10,36 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import Toolbar from './Toolbar';
 import CollaborationPanel from './CollaborationPanel';
 import CommentSection from './CommentSection';
-import Spinner from '../common/Spinner';
-import ShareModal from './ShareModal'
+import ShareModal from './ShareModal';
+import EditorSkeleton from './EditorSkeleton';
 
 import useDocument from '../../hooks/useDocument';
 import useCollaboration from '../../hooks/useCollaboration';
 import useDebounce from '../../hooks/useDebounce';
 import { selectCurrentUser } from '../../redux/slices/authSlice';
 import { AUTOSAVE_DEBOUNCE_MS } from '../../utils/constants';
-import { getCursorColorForUser } from '../../utils/helpers';
+import { getCursorColorForUser, cx } from '../../utils/helpers';
 
 /**
  * The core editing surface for a single document, built on Tiptap + Yjs.
  *
- * Loading gate: renders a spinner until the editor exists, `ydoc`
- * exists. That last flag (from
- * useCollaboration -> SocketIOYjsProvider) is what prevents a document
- * with real prior content from flashing empty — without it, the editor
- * would render immediately against a still-empty `ydoc` before the
- * server's seeded/synced state has arrived.
+ * Loading gate: renders a skeleton until the REST document, the Tiptap
+ * editor instance, AND the Yjs document (`ydoc`) all exist. The `ydoc`
+ * flag is what prevents a document with real prior content from
+ * flashing empty — without it, the editor would render against a
+ * still-empty Y.Doc before the server's seeded/synced state arrives.
+ *
+ * Comments panel:
+ *   - always visible by default (showComments starts true)
+ *   - desktop (lg+): 320px side panel on the right
+ *   - mobile (< lg): inline panel below the editor, capped to ~45vh
+ *   - Toolbar's comments button toggles it on any viewport
  */
-
 const DocumentEditor = ({ documentId }) => {
   const currentUser = useSelector(selectCurrentUser);
+
   const [showComments, setShowComments] = useState(true);
   const [isShareOpen, setIsShareOpen] = useState(false);
-
 
   const {
     activeDocument,
@@ -55,12 +59,9 @@ const DocumentEditor = ({ documentId }) => {
     deleteComment,
   } = useCollaboration(documentId);
 
-  const localColor = currentUser ? getCursorColorForUser(currentUser.id) : '#4f46e5';
-
-
-    
-  console.log(ydoc)
-
+  const localColor = currentUser
+    ? getCursorColorForUser(currentUser.id)
+    : '#4f46e5';
 
   const editor = useEditor(
     {
@@ -68,7 +69,7 @@ const DocumentEditor = ({ documentId }) => {
         ? [
             StarterKit.configure({
               heading: { levels: [1, 2, 3] },
-              history: false, // Collaboration extension supplies Yjs-aware undo/redo
+              history: false, // Collaboration supplies Yjs-aware undo/redo
             }),
             Underline,
             Placeholder.configure({ placeholder: 'Start writing…' }),
@@ -82,75 +83,84 @@ const DocumentEditor = ({ documentId }) => {
               },
             }),
           ]
-        : [StarterKit, Underline, Placeholder.configure({ placeholder: 'Start writing…' })],
+        : [
+            StarterKit,
+            Underline,
+            Placeholder.configure({ placeholder: 'Start writing…' }),
+          ],
       editorProps: {
         attributes: {
-          class: 'prose prose-slate mx-auto max-w-3xl px-12 py-10 focus:outline-none min-h-full',
+          class:
+            'prose prose-slate mx-auto max-w-3xl px-5 py-8 focus:outline-none min-h-full sm:px-8 sm:py-10 md:px-12',
         },
       },
-      onUpdate: ({ editor }) => {
-      // Only save if Yjs is ready (prevents saving during the initial pre‑sync render)
-      if (!ydoc) return;
-      debouncedPersist();
-    },
+      onUpdate: () => {
+        // Only persist after Yjs is ready — otherwise the transient
+        // pre-sync editor instance would fire on every keystroke
+        // against a still-empty doc and overwrite the saved snapshot.
+        if (!ydoc) return;
+        debouncedPersist();
+      },
     },
     [ydoc]
   );
 
-
   // ---------------------------------------------------------------------
   // Durable REST snapshot — debounced, decoupled from real-time sync.
-  // Guarded on `ydoc` so the transient pre-sync editor instance (created
-  // during the single render before `ydoc` exists) never triggers a save.
   // ---------------------------------------------------------------------
   const [debouncedPersist] = useDebounce(() => {
     if (!editor || !ydoc) return;
     saveNow(editor.getHTML());
   }, AUTOSAVE_DEBOUNCE_MS);
 
-
-  // Flush a final save on true component unmount only (empty deps array
-  // + ref), NOT on every editor-instance swap — re-keying this on
-  // `[editor]` was the earlier bug: it fired on the placeholder-editor
-  // teardown too, saving blank content over real content on every mount.
   const editorRef = useRef(editor);
   useEffect(() => {
     editorRef.current = editor;
-    console.log('editor value have been set')
-  }, [editor])
+  }, [editor]);
 
-  const handleTitleChange = useCallback((value) => updateTitle(value),[updateTitle]);
+  const handleTitleChange = useCallback(
+    (value) => updateTitle(value),
+    [updateTitle]
+  );
 
   const handleFormat = useCallback(
     (command) => {
       if (!editor) return;
       const chain = editor.chain().focus();
       switch (command) {
-        case 'bold': chain.toggleBold().run(); break;
-        case 'italic': chain.toggleItalic().run(); break;
-        case 'underline': chain.toggleUnderline().run(); break;
-        case 'insertUnorderedList': chain.toggleBulletList().run(); break;
-        default: break;
+        case 'bold':
+          chain.toggleBold().run();
+          break;
+        case 'italic':
+          chain.toggleItalic().run();
+          break;
+        case 'underline':
+          chain.toggleUnderline().run();
+          break;
+        case 'insertUnorderedList':
+          chain.toggleBulletList().run();
+          break;
+        case 'insertOrderedList':
+          chain.toggleOrderedList().run();
+          break;
+        case 'h1':
+          chain.toggleHeading({ level: 1 }).run();
+          break;
+        case 'h2':
+          chain.toggleHeading({ level: 2 }).run();
+          break;
+        case 'h3':
+          chain.toggleHeading({ level: 3 }).run();
+          break;
+        default:
+          break;
       }
     },
     [editor]
-  );  
+  );
 
-
-  useEffect(() => {
-    console.log('activeStatus: ' + activeStatus)
-    console.log('activeDocument: ' + activeDocument)
-    console.log('editor: ' + editor)
-    console.log('ydoc: ' + ydoc)
-  }, [activeStatus, activeDocument, editor, ydoc])
-
-  
   if (activeStatus === 'loading' || !activeDocument || !editor || !ydoc) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <EditorSkeleton />;
   }
 
   return (
@@ -163,21 +173,35 @@ const DocumentEditor = ({ documentId }) => {
         editor={editor}
         onShareClick={() => setIsShareOpen(true)}
         rightSlot={<CollaborationPanel activeUsers={activeUsers} />}
-        />
+        commentsOpen={showComments}
+        onToggleComments={() => setShowComments((s) => !s)}
+      />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="relative flex-1 overflow-y-auto bg-white">
+      
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* Editing surface */}
+        <div className="relative min-h-0 flex-1 overflow-y-auto bg-white">
           <EditorContent editor={editor} />
         </div>
 
+        {/* Comments — inline below on mobile, side panel on desktop */}
         {showComments && (
-          <div className="w-80 shrink-0 border-l border-slate-200 bg-white">
+          <div
+            className={cx(
+              'flex shrink-0 flex-col bg-white',
+              // Mobile: capped inline panel, top border separates it
+              'h-72 max-h-[45vh] border-t border-slate-200 sm:h-80',
+              // Desktop: fixed-width side panel, left border separates it
+              'lg:h-auto lg:w-80 lg:max-h-none lg:border-l lg:border-t-0'
+            )}
+          >
             <CommentSection
               comments={comments}
               currentUser={currentUser}
               onAddComment={addComment}
               onResolveComment={resolveComment}
               onDeleteComment={deleteComment}
+              onClose={() => setShowComments(false)}
             />
           </div>
         )}
@@ -187,7 +211,7 @@ const DocumentEditor = ({ documentId }) => {
           onClose={() => setIsShareOpen(false)}
           documentId={documentId}
           ownerId={activeDocument.ownerId}
-          />
+        />
       </div>
     </div>
   );
